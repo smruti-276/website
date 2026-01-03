@@ -50,7 +50,7 @@ jobs:
 
       - name: Create Pull Request (dev → master)
         id: cpr
-        uses: smruti-276/website@v5
+        uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           base: dev
@@ -62,7 +62,7 @@ jobs:
           branch: auto-release-${{ github.run_id }}
 
       - name: Merge Pull Request
-        uses: smruti-276/website@v5
+        uses: peter-evans/create-pull-request@v3
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
