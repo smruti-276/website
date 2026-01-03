@@ -1,0 +1,69 @@
+name: Monthly Release (dev → master)
+
+on:
+  # Run automatically on the 25th of every month
+  schedule:
+    - cron: '40 18 24 * *'   # 12:10 AM IST on 25th
+  # Allow manual trigger
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  run-tests:
+    name: Run Tests
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout master branch
+        uses: actions/checkout@v4
+        with:
+          ref: master
+
+      - name: Setup environment
+        run: |
+          echo "Setup environment here"
+          # Example:
+          # npm install
+          # mvn test
+          # pytest
+
+      - name: Run tests
+        run: |
+          echo "Running tests..."
+          # Replace this with real test commands
+          echo "Tests passed!"
+
+  create-and-merge:
+    name: Create and Merge PR
+    runs-on: ubuntu-latest
+    needs: run-tests
+    if: success()
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Create Pull Request (dev → master)
+        id: cpr
+        uses: smruti-276/website@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          base: dev
+          head: master
+          title: "Monthly Release: dev → master"
+          body: |
+            Automated monthly release.
+            All tests passed successfully.
+          branch: auto-release-${{ github.run_id }}
+
+      - name: Merge Pull Request
+        uses: smruti-276/website@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: merge
