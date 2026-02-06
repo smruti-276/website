@@ -1,0 +1,26 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_NAME: website-app
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging into Docker Hub...
+      - echo $DOCKERHUB_PASS | docker login -u $DOCKERHUB_USER --password-stdin
+
+  build:
+    commands:
+      - echo Build started on `date`
+      - docker build -t $IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION .
+      - docker tag $IMAGE_NAME:$CODEBUILD_RESOLVED_SOURCE_VERSION $DOCKERHUB_USER/$IMAGE_NAME:latest
+
+  post_build:
+    commands:
+      - echo Pushing Docker image...
+      - docker push $DOCKERHUB_USER/$IMAGE_NAME:latest
+
+artifacts:
+  files:
+    - '**/*'
